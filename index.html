@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe with AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: red;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .title {
+            text-align: center;
+            margin-top: 1cm;
+        }
+        
+        .watermark {
+            position: absolute;
+            font-size: 3em;
+            color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-50%);
+        }
+        
+        .left-watermark {
+            left: 20px;
+            top: 50%;
+        }
+        
+        .right-watermark {
+            right: 20px;
+            top: 50%;
+        }
+        
+        #menu {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-gap: 10px;
+            margin: 20px auto;
+            align-items: center;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+        
+        .cell {
+            width: 120px;
+            height: 120px;
+            background-color: lightgray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: background-color 0.3s;
+        }
+        
+        .cell.bounce {
+            animation: bounce 0.3s;
+        }
+        
+        .cell:hover {
+            background-color: #d3d3d3;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #winnerScreen {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        #aboutUsScreen {
+            background: linear-gradient(to bottom, #4CAF50, #8BC34A);
+            color: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+        }
+        
+        .about-content {
+            text-align: left;
+        }
+        
+        .about-button {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .about-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">CASAK GAMES</h1>
+
+    <div class="watermark left-watermark">CASAK GAMES</div>
+    <div class="watermark right-watermark">TIC TAC TOE</div>
+
+    <div id="menu">
+        <button id="menuButton">Menu</button>
+        <div id="menuOptions" class="hidden">
+            <button id="backgroundButton">Choose Background Color</button>
+            <div id="colorPicker" class="hidden">
+                <input type="color" id="colorInput" value="#ff0000">
+                <button id="saveColorButton">Save</button>
+            </div>
+            <button id="moreGamesButton">More Games</button>
+            <button id="musicButton">Music</button>
+            <input type="file" id="musicInput" accept="audio/*" class="hidden">
+        </div>
+    </div>
+
+    <div id="gameBoard"></div>
+    <div id="winnerScreen" class="hidden">
+        <h2 id="winnerMessage"></h2>
+        <button id="newGameButton">New Game</button>
+    </div>
+
+    <button id="restartButton">Restart Game</button>
+    <button id="aboutUsButton" class="about-button">About Us</button>
+
+    <div id="aboutUsScreen" class="hidden">
+        <div class="about-content">
+            <h2>We hope you are enjoying our services, and with time, they will get better and better;</h2>
+            <h3>Meet the team:</h3>
+            <h3>Links:</h3>
+            <p>Email: <a href="mailto:casakset@gmail.com">casakset@gmail.com</a></p>
+            <p>Website: <a href="https://github.com/casakset/casakset/" target="_blank">https://github.com/casakset/casakset/</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Music button functionality
+        document.getElementById('musicButton').addEventListener('click', () => {
+            document.getElementById('musicInput').click();
+        });
+
+        document.getElementById('musicInput').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const audioURL = URL.createObjectURL(file);
+                const audio = new Audio(audioURL);
+                audio.loop = true; // Loop the music
+                audio.play().catch(err => console.log("Error playing audio:", err));
+            }
+        });
+
+        // About Us Button functionality
+        const aboutUsButton = document.getElementById('aboutUsButton');
+        aboutUsButton.addEventListener('click', () => {
+            const aboutWindow = window.open('', '_blank');
+            aboutWindow.document.write(`
+                <html>
+                    <head>
+                        <title>About Us - CASAK Project</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background: linear-gradient(to bottom, #4CAF50, #8BC34A);
+                                color: white;
+                                padding: 20px;
+                                margin: 0;
+                            }
+                            .about-content {
+                                text-align: left;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="about-content">
+                            <h2>We hope you are enjoying our services and with time, they will get better and better;</h2>
+                            <h3>Meet the team:</h3>
+                            <p>Hannah Misna - The creator and builder of the 'CASAK' team.</p>
+                            <p>Stephen Kamuri - Implemented all the ideas provided.</p>
+                            <p>Clarence Kago - Developer who has worked on most areas inside CASAK.</p>
+                            <p>Alvin Mbira - Passionate about technology and design.</p>
+                            <p>Anthony Karanja - Provided new ideas and developed basic functions of most games.</p>
+                            <p>Kelvin Mwangi - Helped in debugging and solving errors.</p>
+                            <p>Ezekiel Njuguna - Security enthusiast ensuring safety from cyber threats.</p>
+                            <p>Tiras Wanjohi - Works with Ezekiel on site security.</p>
+                            <p>Simon Kago - Regulates high graphics use for compatibility.</p>
+                            <h3>Links:</h3>
+                            <p>Email: <a href="mailto:casakset@gmail.com">casakset@gmail.com</a></p>
+                            <p>Website: <a href="https://github.com/casakset/casakset/" target="_blank">https://github.com/casakset/casakset/</a></p>
+                        </div>
+                    </body>
+                </html>
+            `);
+            aboutWindow.document.close();
+        });
+
+        // Menu button functionality
+        const menuButton = document.getElementById('menuButton');
+        const menuOptions = document.getElementById('menuOptions');
+        const backgroundButton = document.getElementById('backgroundButton');
+        const colorPicker = document.getElementById('colorPicker');
+        const colorInput = document.getElementById('colorInput');
+        const saveColorButton = document.getElementById('saveColorButton');
+
+        // Load saved background color from localStorage
+        const savedColor = localStorage.getItem('backgroundColor');
+        if (savedColor) {
+            document.body.style.backgroundColor = savedColor;
+            colorInput.value = savedColor;
+        }
+
+        menuButton.addEventListener('click', () => {
+            menuOptions.classList.toggle('hidden');
+        });
+
+        backgroundButton.addEventListener('click', () => {
+            colorPicker.classList.toggle('hidden');
+        });
+
+        // Change the background color immediately when a new color is selected
+        colorInput.addEventListener('input', (event) => {
+            document.body.style.backgroundColor = event.target.value;
+        });
+
+        // Save the selected color to localStorage and close the menu
+        saveColorButton.addEventListener('click', () => {
+            const selectedColor = colorInput.value;
+            localStorage.setItem('backgroundColor', selectedColor);
+            document.body.style.backgroundColor = selectedColor;
+
+            // Close the color picker and the menu
+            colorPicker.classList.add('hidden');
+            menuOptions.classList.add('hidden');
+        });
+
+        // More Games functionality
+        document.getElementById('moreGamesButton').addEventListener('click', () => {
+            const moreGamesWindow = window.open('', '_blank');
+            moreGamesWindow.document.write(`
+                <html>
+                    <head>
+                        <title>More Games</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background: linear-gradient(to bottom, #2193b0, #6dd5ed);
+                                color: white;
+                                padding: 20px;
+                                margin: 0;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                height: 100vh;
+                            }
+                            h1 {
+                                text-align: center;
+                                margin-bottom: 40px;
+                            }
+                            button {
+                                font-size: 18px;
+                                padding: 10px 20px;
+                                margin: 10px;
+                                background-color: #ff5722;
+                                color: white;
+                                border: none;
+                                border-radius: 5px;
+                                cursor: pointer;
+                                transition: background-color 0.3s;
+                            }
+                            button:hover {
+                                background-color: #e64a19;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>More Games Coming Soon!</h1>
+                        <button onclick="window.location.href='https://casakset.github.io/casak-sudoku/'">Play sudoku</button>
+                        <button onclick="window.location.href='https://casakset.github.io/casakset-galaxydefend/'">Defend the galaxy</button>
+                        <button onclick="window.location.href='https://casak-buster.tiiny.site/'">Play Block Buster</button>
+                    </body>
+                </html>
+            `);
+            moreGamesWindow.document.close();
+        });
+
+        // Game logic
+        const gameBoard = document.getElementById('gameBoard');
+        const winnerScreen = document.getElementById('winnerScreen');
+        const winnerMessage = document.getElementById('winnerMessage');
+        const newGameButton = document.getElementById('newGameButton');
+        const restartButton = document.getElementById('restartButton');
+
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X'; // Start with Player X
+        let isGameActive = true;
+
+        const winningCombinations = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+
+        const handleCellClick = (index) => {
+            const cellElement = document.querySelectorAll('.cell')[index]; // Get the cell element
+            if (board[index] === '' && isGameActive && currentPlayer === 'X') {
+                board[index] = currentPlayer;
+                cellElement.classList.add('bounce'); // Add bounce effect class
+                renderBoard();
+                checkWinner();
+                // Remove the bounce class after animation completes
+                setTimeout(() => {
+                    cellElement.classList.remove('bounce');
+                }, 300); // Match this duration with the animation duration
+                
+                if (isGameActive) {
+                    currentPlayer = 'O'; // Switch to AI
+                    aiMove();
+                }
+            }
+        };
+
+        const aiMove = () => {
+            const availableCells = board.map((cell, index) => (cell === '' ? index : null)).filter(index => index !== null);
+            if (availableCells.length > 0) {
+                const randomIndex = Math.floor(Math.random() * availableCells.length);
+                board[availableCells[randomIndex]] = 'O';
+                renderBoard();
+                checkWinner();
+                currentPlayer = 'X'; // Switch back to Player X
+            }
+        };
+
+        const renderBoard = () => {
+            gameBoard.innerHTML = '';
+            board.forEach((cell, index) => {
+                const cellElement = document.createElement('div');
+                cellElement.className = 'cell';
+                cellElement.innerText = cell;
+                cellElement.addEventListener('click', () => handleCellClick(index));
+                gameBoard.appendChild(cellElement);
+            });
+        };
+
+        const checkWinner = () => {
+            for (let i = 0; i < winningCombinations.length; i++) {
+                const [a, b, c] = winningCombinations[i];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    isGameActive = false;
+                    winnerMessage.innerText = `Player ${board[a]} Wins!`;
+                    winnerScreen.classList.remove('hidden');
+                    return;
+                }
+            }
+            if (!board.includes('')) {
+                isGameActive = false;
+                winnerMessage.innerText = `It's a Draw!`;
+                winnerScreen.classList.remove('hidden');
+            }
+        };
+
+        newGameButton.addEventListener('click', () => {
+            board = ['', '', '', '', '', '', '', '', ''];
+            isGameActive = true;
+            currentPlayer = 'X';
+            renderBoard();
+            winnerScreen.classList.add('hidden');
+        });
+
+        // Restart button functionality
+        restartButton.addEventListener('click', () => {
+            board = ['', '', '', '', '', '', '', '', ''];
+            isGameActive = true;
+            currentPlayer = 'X';
+            renderBoard();
+            winnerScreen.classList.add('hidden');
+        });
+
+        renderBoard();
+    </script>
+</body>
+</html>
